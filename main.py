@@ -1,19 +1,22 @@
-import telebot
+# import telebot
 import handlers
-import database
+from config import *
 
 cmds = {
     "help": handlers.help,
     "помощь": handlers.help
 }
 
-bot = telebot.TeleBot("1775120188:AAGjSTkWgUwxwkJfQjEU74dPBvic9FAqkNw")
-
 @bot.message_handler(content_types=['text'])
 def onMessage(message):
-    for name, func in cmds.items():
-        if message.text.lower() == name:
-            func(bot, message)
-            return
+    if db.in_db(message.from_user.id):
+        if message.text.lower() not in cmds:
+            handlers.noCom(message)
+        for name, func in cmds.items():
+            if message.text.lower() == name:
+                func(message)
+                return
+    else:
+        handlers.reg(message)
 
 bot.polling()
