@@ -21,6 +21,10 @@ class database:
         else:
             return True
 
-    def profileInfo(self, tg_id):
+    def profileInfoSQL(self, tg_id):
         self.cur.execute(f"SELECT * FROM players WHERE tg_id = ?", (tg_id,))
         return self.cur.fetchone()
+
+    def updateNickname(self, tg_id, name):
+        self.cur.execute(f"UPDATE players SET name = ? WHERE tg_id = ?", (name, tg_id,))
+        self.conn.commit()
