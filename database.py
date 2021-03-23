@@ -7,11 +7,14 @@ class database:
 
         self.cur = self.conn.cursor()
         self.cur.execute("""CREATE TABLE IF NOT EXISTS
-        players (tg_id INT, name TEXT, money INT)""")
+        players (tg_id INT, name TEXT, money INT, bank INT,
+        coin INT, gold INT)""")
         self.conn.commit()
 
     def reg(self, name, tg_id):
-        self.cur.execute(f"INSERT INTO players VALUES (?, ?, ?)", (tg_id, name, 0))
+        self.cur.execute(f"INSERT INTO players VALUES "
+                         f"(?, ?, ?, ?, ?, ?)",
+                         (tg_id, name, 5000, 5000, 0, 0))
         self.conn.commit()
 
     def in_db(self, tg_id):

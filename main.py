@@ -8,7 +8,11 @@ cmds = {
     "команды": handlers.help,
     "профиль": handlers.profileInfo,
     "ник": handlers.nickname,
-    "никнейм": handlers.nickname
+    "никнейм": handlers.nickname,
+    "основные": handlers.helpMain,
+    "игровые": handlers.helpGames,
+    "развлекательные": handlers.helpFun,
+    "клановые": handlers.helpClan
 }
 
 @bot.message_handler(content_types=['text'])
