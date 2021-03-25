@@ -12,12 +12,14 @@ cmds = {
     "основные": handlers.helpMain,
     "игровые": handlers.helpGames,
     "развлекательные": handlers.helpFun,
-    "клановые": handlers.helpClan
+    "клановые": handlers.helpClan,
+    "банк": handlers.bankInfo,
+    "баланс": handlers.balance
 }
 
 @bot.message_handler(content_types=['text'])
 def onMessage(message):
-    if db.in_db(message.from_user.id):
+    if db.inDb(message.from_user.id):
         if message.text.lower().split()[0] not in cmds:
             handlers.noCom(message)
         for name, func in cmds.items():

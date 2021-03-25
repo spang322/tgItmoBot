@@ -1,5 +1,6 @@
 # from telebot import types
 from config import *
+import datetime
 
 def help(message):
     if " " in message.text:
@@ -28,10 +29,10 @@ def helpMain(message):
     bot.send_message(message.from_user.id, """Основные команды:
     Профиль - сделано
     Ник [текст] - сделано
-    Баланс
-    Банк
-        Банк положить [сумма]
-        Банк снять [сумма]
+    Баланс - сделано
+    Банк - сделано
+        Банк положить [сумма] - сделано
+        Банк снять [сумма] - сделано
     Передать [никнейм][сумма][комментарий]
     Работа
     Бизнес
@@ -92,11 +93,14 @@ def reg(message):
 
 def createProfile(message):
     db.reg(message.text, message.from_user.id)
-    bot.register_next_step_handler(message, profileInfo)
+    info = db.profileInfoSQL(message.from_user.id)
+    bot.send_message(message.from_user.id, f"Информация о профиле:\nID: {info[0]}\nНик: {info[1]}\nДенег: {info[2]}$\n"
+                                           f"В банке: {info[3]}$")
 
 def profileInfo(message):
     info = db.profileInfoSQL(message.from_user.id)
-    bot.send_message(message.from_user.id, f"ID: {info[0]}\nНик: {info[1]}\nДенег: {info[2]}$")
+    bot.send_message(message.from_user.id, f"Информация о профиле:\nID: {info[0]}\nНик: {info[1]}\nДенег: {info[2]}$\n"
+                                           f"В банке: {info[3]}$")
 
 def nickname(message):
     if " " in message.text:
@@ -106,3 +110,41 @@ def nickname(message):
         info = db.profileInfoSQL(message.from_user.id)
         bot.send_message(message.from_user.id, f"Ваш никнейм: {info[1]}\nВведите команду 'Ник [текст]' для смены никнейма")
 
+def bankInfo(message):
+    if " положить" in message.text:
+        deposit(message, int(message.text[message.text.rfind(" ") + 1:]))
+    elif " снять" in message.text:
+        withdraw(message, int(message.text[message.text.rfind(" ") + 1:]))
+    bankPercent(message)
+    bank = db.bankMoney(message.from_user.id)
+    bot.send_message(message.from_user.id, f"На вашем счету: {bank[2]}$\nВ час капает примерно: {int(bank[2]*0.05)}$")
+
+def bankPercent(message):
+    bank = db.bankMoney(message.from_user.id)
+    time1 = datetime.datetime.fromisoformat(bank[0])
+    time2 = datetime.datetime.now()
+    diff = time2 - time1
+    diff = diff.seconds + bank[1]
+    money = bank[2]*(1.05**(diff//3600))
+    db.increaseBank(message.from_user.id, money, diff % 15, datetime.datetime.now())
+
+def deposit(message, money):
+    info = db.profileInfoSQL(message.from_user.id)
+    if info[2] >= money:
+        bankPercent(message)
+        db.depositSQL(message.from_user.id, money)
+    else:
+        bot.send_message(message.from_user.id, "Недостаточно средств")
+
+def withdraw(message, money):
+    info = db.profileInfoSQL(message.from_user.id)
+    if info[3] >= money:
+        bankPercent(message)
+        db.withdrawSQL(message.from_user.id, money)
+    else:
+        bot.send_message(message.from_user.id, "Недостаточно средств")
+
+def balance(message):
+    info = db.profileInfoSQL(message.from_user.id)
+    bot.send_message(message.from_user.id, f"Информация о баланса:\nДенег: {info[2]}$\n"
+                                           f"В банке: {info[3]}$\nBlincoin: {info[6]}\nBlingold: {info[7]}")
