@@ -33,7 +33,7 @@ def helpMain(message):
     Банк - сделано
         Банк положить [сумма] - сделано
         Банк снять [сумма] - сделано
-    Передать [никнейм][сумма][комментарий]
+    Передать [никнейм][сумма]
     Работа
     Бизнес
     Топ
@@ -117,7 +117,7 @@ def bankInfo(message):
         withdraw(message, int(message.text[message.text.rfind(" ") + 1:]))
     bankPercent(message)
     bank = db.bankMoney(message.from_user.id)
-    bot.send_message(message.from_user.id, f"На вашем счету: {bank[2]}$\nВ час капает примерно: {int(bank[2]*0.05)}$")
+    bot.send_message(message.from_user.id, f"На вашем счету: {bank[2]}$\nВ час капает: {int(bank[2]*0.05)}$")
 
 def bankPercent(message):
     bank = db.bankMoney(message.from_user.id)
@@ -148,3 +148,14 @@ def balance(message):
     info = db.profileInfoSQL(message.from_user.id)
     bot.send_message(message.from_user.id, f"Информация о баланса:\nДенег: {info[2]}$\n"
                                            f"В банке: {info[3]}$\nBlincoin: {info[6]}\nBlingold: {info[7]}")
+
+def give(message):
+    money = int(message.text[message.text.rfind(" ") + 1:])
+    nick = message.text[message.text.find(" ") + 1:message.text.rfind(" ")]
+    info = db.profileInfoSQL(message.from_user.id)
+    if info[2] >= money:
+        db.giveSQL(nick, message.from_user.id, money)
+        bot.send_message(message.from_user.id, f"Вы успешно перевели {money}$ игроку {nick}")
+        bot.send_message(db.IdByName(nick)[0], f"Игрок {info[1]} перевел вам {money}$")
+    else:
+        bot.send_message(message.from_user.id, "Недостаточно средств")

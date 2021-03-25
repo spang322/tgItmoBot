@@ -56,3 +56,12 @@ class database:
     def updateNickname(self, tg_id, name):
         self.cur.execute(f"UPDATE players SET name = ? WHERE tg_id = ?", (name, tg_id,))
         self.conn.commit()
+
+    def giveSQL(self, receiver, sender, money):
+        self.cur.execute(f"UPDATE players SET money = money+? WHERE name = ?", (money, receiver))
+        self.cur.execute(f"UPDATE players SET money = money-? WHERE tg_id = ?", (money, sender))
+        self.conn.commit()
+
+    def IdByName(self, name):
+        self.cur.execute(f"SELECT tg_id FROM players WHERE name = ?", (name,))
+        return self.cur.fetchone()
