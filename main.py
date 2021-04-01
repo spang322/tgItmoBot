@@ -15,7 +15,13 @@ cmds = {
     "клановые": handlers.helpClan,
     "банк": handlers.bankInfo,
     "баланс": handlers.balance,
-    "передать": handlers.give
+    "передать": handlers.give,
+    "работа": handlers.jobInfo,
+    "работы": handlers.jobList,
+    "бонус": handlers.bonus,
+    "шар": handlers.magicBall,
+    "шанс": handlers.chance
+
 }
 
 @bot.message_handler(content_types=['text'])

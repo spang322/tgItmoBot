@@ -9,18 +9,28 @@ class database:
         self.cur = self.conn.cursor()
         self.cur.execute("""CREATE TABLE IF NOT EXISTS
         players (tg_id INT, name TEXT, money INT, bank INT,
-        bank_time DATETIME, bonus DATE, coin INT, gold INT,
-        bank_extra_time INT)""")
+        bank_time DATETIME, bonus DATETIME, coin INT, gold INT,
+        bank_extra_time INT, job_num INT, job_time DATETIME,
+        work_record INT, job_lvl INT, job_extra_time INT)""")
         self.conn.commit()
 
     def reg(self, name, tg_id):
         self.cur.execute(f"INSERT INTO players VALUES "
-                         f"(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         f"(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (tg_id, name, 5000, 5000,
                           datetime.datetime.today(),
-                          datetime.date.today(),
-                          0, 0, 0))
+                          datetime.datetime.today(),
+                          0, 0, 0, 0,
+                          datetime.datetime.now(),
+                          0, 1, 0))
         self.conn.commit()
+
+    def nameExist(self, name):
+        self.cur.execute(f"SELECT tg_id FROM players WHERE name = ?", (name,))
+        if self.cur.fetchone() == None:
+            return True
+        else:
+            return False
 
     def bankMoney(self, tg_id):
         self.cur.execute("SELECT bank_time, bank_extra_time, bank FROM players WHERE tg_id = ?", (tg_id,))
@@ -49,6 +59,13 @@ class database:
         else:
             return True
 
+    def nameInDb(self, name):
+        self.cur.execute(f"SELECT name FROM players WHERE name = ?", (name,))
+        if self.cur.fetchone() == None:
+            return False
+        else:
+            return True
+
     def profileInfoSQL(self, tg_id):
         self.cur.execute(f"SELECT * FROM players WHERE tg_id = ?", (tg_id,))
         return self.cur.fetchone()
@@ -65,3 +82,36 @@ class database:
     def IdByName(self, name):
         self.cur.execute(f"SELECT tg_id FROM players WHERE name = ?", (name,))
         return self.cur.fetchone()
+
+    def jobInfoSQL(self, tg_id):
+        self.cur.execute(f"SELECT job_num, job_time, job_lvl, work_record, job_extra_time FROM players WHERE tg_id = ?", (tg_id,))
+        return self.cur.fetchone()
+
+    def salary(self, tg_id, money):
+        self.cur.execute(f"UPDATE players SET bank = bank+? WHERE tg_id = ?",
+                         (money, tg_id,))
+        self.cur.execute(f"UPDATE players SET job_time = ? WHERE tg_id = ?",
+                         (datetime.datetime.now(), tg_id,))
+        self.conn.commit()
+
+    def jobLvlUp(self, tg_id, work_record, extra_seconds):
+        self.cur.execute(f"UPDATE players SET work_record = work_record+? WHERE tg_id = ?",
+                         (work_record, tg_id,))
+        self.cur.execute(f"UPDATE players SET job_extra_time = job_extra_time+? WHERE tg_id = ?",
+                         (extra_seconds, tg_id,))
+        self.conn.commit()
+
+    def getJobSQL(self, tg_id, job_id):
+        self.cur.execute(f"UPDATE players SET job_num = ? WHERE tg_id = ?",
+                         (job_id, tg_id))
+        self.conn.commit()
+
+
+
+    def bonusSQL(self, tg_id):
+        self.cur.execute(f"SELECT bonus FROM players WHERE tg_id = ?", (tg_id,))
+        return self.cur.fetchone()
+
+    def giveBonus(self, tg_id, money):
+        self.cur.execute(f"UPDATE players SET money = money+? WHERE tg_id = ?", (money, tg_id,))
+        self.conn.commit()
