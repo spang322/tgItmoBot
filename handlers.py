@@ -1,11 +1,10 @@
-# from telebot import types
 from math import floor
 from config import *
 from random import randint, choice
 import datetime
 
 
-def help(message):
+def helper(message):
     if " " in message.text:
         second_word = message.text.split()[1]
         if second_word.lower() == "основные" or second_word.lower() == "1":
@@ -28,6 +27,7 @@ def help(message):
     Репорт [текст] - есть вопросы? Задавай!
     Беседы - места, где можно поиграть в бота""")
 
+
 def helpMain(message):
     bot.send_message(message.from_user.id, """Основные команды:
     Профиль - сделано
@@ -36,7 +36,7 @@ def helpMain(message):
     Банк - сделано
         Банк положить [сумма] - сделано
         Банк снять [сумма] - сделано
-    Передать [никнейм] [сумма] - сделано (FIXME)
+    Передать [никнейм] [сумма] - сделано
     Работа - сделано
     Бизнес
     Топ
@@ -46,6 +46,7 @@ def helpMain(message):
     Магазин
     Бонус - сделано (FIXME)
     Настройки""")
+
 
 def helpGames(message):
     bot.send_message(message.from_user.id, """Игровые команды:
@@ -58,6 +59,7 @@ def helpGames(message):
         Поставить [сумма]
         Казино стоп""")
 
+
 def helpFun(message):
     bot.send_message(message.from_user.id, """Развлекательные команды:
     Вики [текст]
@@ -68,6 +70,7 @@ def helpFun(message):
         Брак развод
     Погода [город]
     Дата""")
+
 
 def helpClan(message):
     bot.send_message(message.from_user.id, """Клановые команды:
@@ -87,14 +90,15 @@ def helpClan(message):
     Клан выгнать [никнейм]
     Клан покинуть""")
 
+
 def noCom(message):
     bot.send_message(message.from_user.id, "Такой команды нет")
-
 
 
 def reg(message):
     bot.send_message(message.from_user.id, "Пора зарегистрироваться!\nВведите свой ник")
     bot.register_next_step_handler(message, createProfile)
+
 
 def createProfile(message):
     if db.nameExist(message.text):
@@ -109,6 +113,7 @@ def createProfile(message):
         bot.send_message(message.from_user.id, "Такой ник уже занят\nВведите другой")
         bot.register_next_step_handler(message, createProfile)
 
+
 def profileInfo(message):
     info = db.profileInfoSQL(message.from_user.id)
     bot.send_message(message.from_user.id, f"Информация о профиле:\n"
@@ -116,6 +121,7 @@ def profileInfo(message):
                                            f"Ник: {info[1]}\n"
                                            f"Денег: {info[2]}$\n"
                                            f"В банке: {info[3]}$")
+
 
 def nickname(message):
     if " " in message.text:
@@ -126,6 +132,7 @@ def nickname(message):
         bot.send_message(message.from_user.id, f"Ваш никнейм: {info[1]}\n"
                                                f"Введите команду 'Ник [текст]' для смены никнейма")
 
+
 def balance(message):
     info = db.profileInfoSQL(message.from_user.id)
     bot.send_message(message.from_user.id, f"Информация о баланса:\n"
@@ -133,7 +140,6 @@ def balance(message):
                                            f"В банке: {info[3]}$\n"
                                            f"Blincoin: {info[6]}\n"
                                            f"Blingold: {info[7]}")
-
 
 
 def bankInfo(message):
@@ -153,7 +159,8 @@ def bankInfo(message):
         bankPercent(message)
         bank = db.bankMoney(message.from_user.id)
         bot.send_message(message.from_user.id, f"На вашем счету: {bank[2]}$\n"
-                                               f"В час капает: {int(bank[2]*0.05)}$")
+                                               f"В час капает: {int(bank[2] * 0.05)}$")
+
 
 def bankPercent(message):
     bank = db.bankMoney(message.from_user.id)
@@ -161,8 +168,9 @@ def bankPercent(message):
     time2 = datetime.datetime.now()
     diff = time2 - time1
     diff = diff.seconds + bank[1]
-    money = bank[2]*(1.05**(diff//3600))
+    money = bank[2] * (1.05 ** (diff // 3600))
     db.increaseBank(message.from_user.id, money, diff % 15, datetime.datetime.now())
+
 
 def deposit(message, money):
     info = db.profileInfoSQL(message.from_user.id)
@@ -172,6 +180,7 @@ def deposit(message, money):
         bot.send_message(message.from_user.id, f"Вы положили на счет {money}$")
     else:
         bot.send_message(message.from_user.id, "Недостаточно средств")
+
 
 def withdraw(message, money):
     info = db.profileInfoSQL(message.from_user.id)
@@ -183,24 +192,25 @@ def withdraw(message, money):
         bot.send_message(message.from_user.id, "Недостаточно средств")
 
 
-
-def give(message): # FIXME
+def give(message):
     try:
         money = int(message.text[message.text.rfind(" ") + 1:])
         nick = message.text[message.text.find(" ") + 1:message.text.rfind(" ")]
         info = db.profileInfoSQL(message.from_user.id)
         if info[2] >= money:
-            if db.nameInDb(nick):
-                db.giveSQL(nick, message.from_user.id, money)
-                bot.send_message(message.from_user.id, f"Вы успешно перевели {money}$ игроку {nick}")
-                bot.send_message(db.IdByName(nick)[0], f"Игрок {info[1]} перевел вам {money}$")
+            if money > 0:
+                if db.nameInDb(nick):
+                    db.giveSQL(nick, message.from_user.id, money)
+                    bot.send_message(message.from_user.id, f"Вы успешно перевели {money}$ игроку {nick}")
+                    bot.send_message(db.IdByName(nick)[0], f"Игрок {info[1]} перевел вам {money}$")
+                else:
+                    bot.send_message(message.from_user.id, "Игрока с таким ником не существует")
             else:
-                bot.send_message(message.from_user.id, "Игрока с таким ником не существует")
+                bot.send_message(message.from_user.id, "Неверно введена сумма")
         else:
             bot.send_message(message.from_user.id, "Недостаточно средств")
     except ValueError:
         bot.send_message(message.from_user.id, "Неверно введена сумма")
-
 
 
 def jobRefresh(message):
@@ -212,6 +222,7 @@ def jobRefresh(message):
     diff = floor(diff.seconds / 3600)
     db.jobLvlUp(message.from_user.id, diff, extra_seconds)
     return diff
+
 
 def jobInfo(message):
     job_refresh = jobRefresh(message)
@@ -243,9 +254,10 @@ def jobInfo(message):
                                                        f"Вы можете посмотреть список доступных вам работ с помощью команды 'Работы'")
             else:
                 bot.send_message(message.from_user.id, f"Вы работаете {jobs[info[0]]}\n"
-                                                   f"Вы работали {diff} часов и получили зарплату в размере {money}$\n"
-                                                   f"Вы можете посмотреть список доступных вам работ с помощью команды 'Работы'")
+                                                       f"Вы работали {diff} часов и получили зарплату в размере {money}$\n"
+                                                       f"Вы можете посмотреть список доступных вам работ с помощью команды 'Работы'")
                 db.salary(message.from_user.id, money)
+
 
 def jobList(message):
     jobRefresh(message)
@@ -260,29 +272,33 @@ def jobList(message):
                                            f"Вы можете сменить работу с помощью команды 'Работа [номер]'")
 
 
-
 def bonus(message):
     info = db.bonusSQL(message.from_user.id)
     time = datetime.datetime.fromisoformat(info[0])
-    #time_left = datetime.time(time.hour, time.minute, time.second) - FIXME
+    print(time)
+    # time_left = datetime.time(time.hour, time.minute, time.second) - FIXME
     day = datetime.datetime.now()
-    #time_now = datetime.time(day.hour, day.minute, day.second) - FIXME
+    print(day)
+    # time_now = datetime.time(day.hour, day.minute, day.second) - FIXME
     diff1 = day - time
-    #diff2 = datetime.timedelta() - FIXME
+    print(type(diff1.min))
+    # diff2 = datetime.timedelta() - FIXME
     if diff1.days >= 1:
         money = randint(5000, 50000)
         db.giveBonus(message.from_user.id, money)
         bot.send_message(message.from_user.id, f"Вам выдан бонус в размере {money}")
     else:
         bot.send_message(message.from_user.id, f"Вы уже получали бонус сегодня\n")
-                                               #f"Следующий бонус можно получить через {diff2}") - FIXME
-
+        # f"Следующий бонус можно получить через {diff2}")
 
 
 def magicBall(message):
     bot.send_message(message.from_user.id, choice(magic_ball))
 
 
-
 def chance(message):
     bot.send_message(message.from_user.id, choice(chance_phrases) + str(randint(0, 100)) + "%")
+
+
+def business(message):
+    pass

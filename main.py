@@ -1,11 +1,11 @@
-# import telebot
 import handlers
 from config import *
 
+
 cmds = {
-    "help": handlers.help,
-    "помощь": handlers.help,
-    "команды": handlers.help,
+    "help": handlers.helper,
+    "помощь": handlers.helper,
+    "команды": handlers.helper,
     "профиль": handlers.profileInfo,
     "ник": handlers.nickname,
     "никнейм": handlers.nickname,
@@ -21,8 +21,8 @@ cmds = {
     "бонус": handlers.bonus,
     "шар": handlers.magicBall,
     "шанс": handlers.chance
-
 }
+
 
 @bot.message_handler(content_types=['text'])
 def onMessage(message):
@@ -35,5 +35,6 @@ def onMessage(message):
                 return
     else:
         handlers.reg(message)
+
 
 bot.polling()
